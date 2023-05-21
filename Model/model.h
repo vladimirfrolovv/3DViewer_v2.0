@@ -23,14 +23,14 @@ class Model {
   /// @param st struct
   /// @param capacity_ver current capacity array of coordinates
   /// @return error
-  void ParseVertex(char *ptr);
+  void ParseVertex(char* ptr);
   /// @brief function for parse poligons
   /// @param ptr pointer for current line
   /// @param st struct
   /// @param poligons_counter counter current amount poligons
   /// @param capacity_pol current capacity array of poligons
   /// @return error
-  void ParsePoligons(char *ptr);
+  void ParsePoligons(char* ptr);
   /// @brief functoin for find max and min coordinates of all axis
   /// @param st struct
   /// @param counter_axis counter of current axis
@@ -67,30 +67,15 @@ class Model {
   /// @param axis
   void Move(double a, char axis);
 
-  std::pair<double*, unsigned*> GetArr() {
-      Converter();
-    return std::pair<double*, unsigned*>(
-        vertex_, poligons_);
+  std::pair<double*, unsigned*> GetArr();
+  void Converter();
+  std::pair<unsigned, unsigned> GetSize();
+
+  ~Model() {
+    delete vertex_;
+    delete poligons_;
   }
-  void Converter(){
-      vertex_ = new double[vertex.size()]();
-      int i = 0;
-      for(auto it : vertex){
-          vertex_[i] = it;
-          i++;
-      }
-      poligons_ = new unsigned[poligons.size()]();
-      int j = 0;
-      for(auto it : poligons){
-          poligons_[j] = it;
-          j++;
-      }
-  }
-  std::pair<unsigned ,unsigned> GetSize(){
-      return std::pair<unsigned ,unsigned>(vertex.size(), poligons.size());
-  }
-    ~Model() { delete vertex_;
-  delete poligons_;}
+
  private:
   std::vector<double> vertex;
   std::vector<unsigned> poligons;

@@ -52,10 +52,10 @@ void Myopengl::paintGL() {
 }
 
 void Myopengl::mouseMoveEvent(QMouseEvent *mo) {
-//  scale = 1;
-//  rotation_x(0.001 / M_PI * (mo->pos().y() - mPos.y()), res);
-//  rotation_y((0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, res);
-//  update();
+  scale = 1;
+  rotation_x(0.001 / M_PI * (mo->pos().y() - mPos.y()), res);
+  rotation_y((0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, res);
+  update();
 }
 
 void Myopengl::mousePressEvent(QMouseEvent *mo) {

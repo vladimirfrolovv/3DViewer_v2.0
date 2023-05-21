@@ -8,22 +8,22 @@ int Model::Parse(std ::string filename) {
   int status = 0;
   std::string line;
   std::ifstream file(filename);
-//  if (file) {
-    char *ptr = nullptr;
-    if (!status) {
-      while (getline(file, line)) {
-        ptr = const_cast<char *>(line.c_str());
-        if (*ptr == 'v') {
-          ParseVertex(ptr);
-        } else if (*ptr == 'f') {
-          ParsePoligons(ptr);
-        }
+  //  if (file) {
+  char *ptr = nullptr;
+  if (!status) {
+    while (getline(file, line)) {
+      ptr = const_cast<char *>(line.c_str());
+      if (*ptr == 'v') {
+        ParseVertex(ptr);
+      } else if (*ptr == 'f') {
+        ParsePoligons(ptr);
       }
     }
-    file.close();
-//  } else {
-//    status = 1;
-//  }
+  }
+  file.close();
+  //  } else {
+  //    status = 1;
+  //  }
 
   return status;
 }
@@ -100,28 +100,28 @@ void Model::MinMaxCoord(int counter_axis, double coord) {
 
 void Model::RotationX(double angle) {
   for (unsigned i = 0; i < vertex.size(); i += 3) {
-    double temp_y = vertex[i + 1];
-    double temp_z = vertex[i + 2];
-    vertex[i + 1] = cos(angle) * temp_y + sin(angle) * temp_z;
-    vertex[i + 2] = -sin(angle) * temp_y + cos(angle) * temp_z;
+    double temp_y = vertex_[i + 1];
+    double temp_z = vertex_[i + 2];
+    vertex_[i + 1] = cos(angle) * temp_y + sin(angle) * temp_z;
+    vertex_[i + 2] = -sin(angle) * temp_y + cos(angle) * temp_z;
   }
 }
 
 void Model::RotationY(double angle) {
   for (unsigned i = 0; i < vertex.size(); i += 3) {
-    double temp_x = vertex[i];
-    double temp_z = vertex[i + 2];
-    vertex[i] = cos(angle) * temp_x + sin(angle) * temp_z;
-    vertex[i + 2] = -sin(angle) * temp_x + cos(angle) * temp_z;
+    double temp_x = vertex_[i];
+    double temp_z = vertex_[i + 2];
+    vertex_[i] = cos(angle) * temp_x + sin(angle) * temp_z;
+    vertex_[i + 2] = -sin(angle) * temp_x + cos(angle) * temp_z;
   }
 }
 
 void Model::RotationZ(double angle) {
   for (unsigned i = 0; i < vertex.size(); i += 3) {
-    double temp_x = vertex[i];
-    double temp_y = vertex[i + 1];
-    vertex[i] = cos(angle) * temp_x - sin(angle) * temp_y;
-    vertex[i + 1] = sin(angle) * temp_x + cos(angle) * temp_y;
+    double temp_x = vertex_[i];
+    double temp_y = vertex_[i + 1];
+    vertex_[i] = cos(angle) * temp_x - sin(angle) * temp_y;
+    vertex_[i + 1] = sin(angle) * temp_x + cos(angle) * temp_y;
   }
 }
 
@@ -137,18 +137,18 @@ void Model::SettingToCenter() {
 }
 void Model::SetScale(double scale) {
   for (unsigned i = 0; i < vertex.size(); i++) {
-    vertex[i] *= scale;
+    vertex_[i] *= scale;
   }
 }
 
 void Model::Move(double a, char axis) {
   for (unsigned i = 0; i < vertex.size(); i += 3) {
     if (axis == 'x')
-      vertex[i] += a;
+      vertex_[i] += a;
     else if (axis == 'y')
-      vertex[i + 1] += a;
+      vertex_[i + 1] += a;
     else if (axis == 'z')
-      vertex[i + 2] += a;
+      vertex_[i + 2] += a;
   }
 }
 
@@ -161,5 +161,29 @@ double Model::Normalize() {
   double scale = (value - (value * (-1))) / d;
   return scale;
 }
+void Model::Converter() {
+  vertex_ = new double[vertex.size()]();
+  int i = 0;
+  for (auto it : vertex) {
+    vertex_[i] = it;
+    i++;
+  }
+  poligons_ = new unsigned[poligons.size()]();
+  int j = 0;
+  for (auto it : poligons) {
+    poligons_[j] = it;
+    j++;
+  }
+}
+std::pair<double *, unsigned *> Model::GetArr() {
+    SettingToCenter();
 
+    Converter();
+    double scale = Normalize();
+    SetScale(scale);
+  return std::pair<double *, unsigned *>(vertex_, poligons_);
+}
+std::pair<unsigned, unsigned> Model::GetSize() {
+  return std::pair<unsigned, unsigned>(vertex.size(), poligons.size());
+}
 }  // namespace s21
