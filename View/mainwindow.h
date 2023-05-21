@@ -8,8 +8,8 @@
 #include <QSettings>
 #include <QTimer>
 
-#include "QtGifimage/gifimage/qgifimage.h"
-#include "s21_3DViewer.h"
+#include "../QtGifimage/gifimage/qgifimage.h"
+#include "../Controller/controller.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

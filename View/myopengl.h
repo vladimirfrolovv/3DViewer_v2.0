@@ -1,7 +1,7 @@
 #ifndef MYOPENGL_H
 #define MYOPENGL_H
 
-#include <mainwindow.h>
+#include "View/mainwindow.h"
 #include <stdlib.h>
 
 #include <QColor>
@@ -11,7 +11,7 @@
 #include <QOpenGLWidget>
 #include <QThread>
 
-#include "s21_3DViewer.h"
+//#include "s21_3DViewer.h"
 
 class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
  public:
@@ -26,12 +26,13 @@ class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
   int proection = 0;
   int form_points = 0;
   ~Myopengl() {
-    if (res) {
-      s21_remove_struct(res);
-      free(res);
-    }
+//    if (res) {
+//      s21_remove_struct(res);
+//      free(res);
+//    }
   }
-  exit_st *res;
+  std::pair<std::vector<double>, std::vector<unsigned>> res;
+  std::pair<unsigned , unsigned> size;
   QPoint mPos;
   double point_thickness = 0;
 

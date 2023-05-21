@@ -51,19 +51,18 @@ void MainWindow::on_EditFile_clicked() {
       QFileDialog::getOpenFileName(this, "Open file", "/Users", "*.obj");
   ui->filepath->setText(str);
   std::string v_str = str.toStdString();
-  const char *strch = v_str.c_str();
-  auto s = const_cast<char *>(strch);
-
-  exit_st *st = (exit_st *)calloc(1, sizeof(exit_st));
-  s21_parse(st, s);
-  setting_to_center(st);
-  double scale = normalize(st);
-  set_scale(st, scale);
-  ui->widget->res = st;
-  QString buf_line = QString::number(st->amount_struct_pol / 2 / 2);
-  ui->label_line->setText(buf_line);
-  buf_line = QString::number(st->amount_struct_ver / 3);
-  ui->label_vertex->setText(buf_line);
+    s21::Controller controller;
+    std::pair<double*, unsigned*> pair_ = controller.GetPair(v_str);
+    std::pair<unsigned, unsigned> size_ = controller.GetModelSize();
+//  setting_to_center(st);
+//  double scale = normalize(st);
+//  set_scale(st, scale);
+  ui->widget->res = pair_;
+  ut->widget->size = size_;
+//  QString buf_line = QString::number(st->amount_struct_pol / 2 / 2);
+//  ui->label_line->setText(buf_line);
+//  buf_line = QString::number(st->amount_struct_ver / 3);
+//  ui->label_vertex->setText(buf_line);
 }
 
 void MainWindow::on_scale_line_edit_returnPressed() {

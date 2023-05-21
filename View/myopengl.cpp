@@ -2,7 +2,6 @@
 
 #include <QMoveEvent>
 Myopengl::Myopengl(QWidget *parent) : QOpenGLWidget{parent} {
-  res = (exit_st *)calloc(1, sizeof(exit_st));
 }
 
 void Myopengl::initializeGL() {
@@ -21,7 +20,7 @@ void Myopengl::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnableClientState(GL_VERTEX_ARRAY);
   glLineWidth(thickness);
-  set_scale(res, scale);
+//  set_scale(res, scale);
   striple_setting();
 
   glColor3f(line_color.redF(), line_color.greenF(), line_color.blueF());
@@ -39,15 +38,15 @@ void Myopengl::paintGL() {
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
     glTranslatef(0, 0, 0);
   }
-  glVertexPointer(3, GL_DOUBLE, 0, res->vertex);
+  glVertexPointer(3, GL_DOUBLE, 0, res.first);
 
-  glDrawElements(GL_LINES, res->amount_struct_pol, GL_UNSIGNED_INT,
-                 res->poligons);
+  glDrawElements(GL_LINES, res.second.size(), GL_UNSIGNED_INT,
+                 res.second);
 
   if (form_points != 0) {
     point_setting();
-    glDrawElements(GL_POINTS, res->amount_struct_pol, GL_UNSIGNED_INT,
-                   res->poligons);
+    glDrawElements(GL_POINTS, res.first.size(), GL_UNSIGNED_INT,
+                   res.first);
   }
   glDisableClientState(GL_VERTEX_ARRAY);
 }
