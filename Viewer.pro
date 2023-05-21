@@ -9,19 +9,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    myopengl.cpp \
-    s21_affine.c \
-    s21_parse.c
+    View/main.cpp \
+    View/mainwindow.cpp \
+    View/myopengl.cpp \
+    Model/model.cc \
+    Controller/controller.cc
 
 HEADERS += \
-    mainwindow.h \
-    myopengl.h \
-    s21_3DViewer.h
+    View/mainwindow.h \
+    View/myopengl.h \
+    Controller/controller.h \
+    Model/model.h
 
 FORMS += \
-    mainwindow.ui
+    View/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

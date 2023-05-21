@@ -69,26 +69,28 @@ class Model {
 
   std::pair<double*, unsigned*> GetArr() {
       Converter();
-    return std::pair<double*, unsigned*> pair_({
-        vertex_, poligons_});
+    return std::pair<double*, unsigned*>(
+        vertex_, poligons_);
   }
   void Converter(){
-      vertex_ = new double(vertex.size())();
+      vertex_ = new double[vertex.size()]();
       int i = 0;
       for(auto it : vertex){
           vertex_[i] = it;
           i++;
       }
-      poligons_ = new double(poligons.size())();
+      poligons_ = new unsigned[poligons.size()]();
       int j = 0;
       for(auto it : poligons){
-          poligons[j] = it;
+          poligons_[j] = it;
           j++;
       }
   }
   std::pair<unsigned ,unsigned> GetSize(){
-      return std::pair<unsigned ,unsigned> size_(vertex.size(), poligons.size());
+      return std::pair<unsigned ,unsigned>(vertex.size(), poligons.size());
   }
+    ~Model() { delete vertex_;
+  delete poligons_;}
  private:
   std::vector<double> vertex;
   std::vector<unsigned> poligons;

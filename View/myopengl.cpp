@@ -40,22 +40,22 @@ void Myopengl::paintGL() {
   }
   glVertexPointer(3, GL_DOUBLE, 0, res.first);
 
-  glDrawElements(GL_LINES, res.second.size(), GL_UNSIGNED_INT,
+  glDrawElements(GL_LINES, size.second, GL_UNSIGNED_INT,
                  res.second);
 
   if (form_points != 0) {
     point_setting();
-    glDrawElements(GL_POINTS, res.first.size(), GL_UNSIGNED_INT,
+    glDrawElements(GL_POINTS, size.first, GL_UNSIGNED_INT,
                    res.first);
   }
   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Myopengl::mouseMoveEvent(QMouseEvent *mo) {
-  scale = 1;
-  rotation_x(0.001 / M_PI * (mo->pos().y() - mPos.y()), res);
-  rotation_y((0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, res);
-  update();
+//  scale = 1;
+//  rotation_x(0.001 / M_PI * (mo->pos().y() - mPos.y()), res);
+//  rotation_y((0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, res);
+//  update();
 }
 
 void Myopengl::mousePressEvent(QMouseEvent *mo) {

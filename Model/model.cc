@@ -7,26 +7,23 @@ int Model::Parse(std ::string filename) {
   setlocale(LC_NUMERIC, "C");
   int status = 0;
   std::string line;
-  ifstream file(filename);
-  if (file) {
+  std::ifstream file(filename);
+//  if (file) {
     char *ptr = nullptr;
-    int poligons_counter = 0;
-    int vertex_counter = 0;
     if (!status) {
-      while (getline(file, line) != -1) {
+      while (getline(file, line)) {
         ptr = const_cast<char *>(line.c_str());
         if (*ptr == 'v') {
           ParseVertex(ptr);
         } else if (*ptr == 'f') {
-          ParseVertex(ptr);
+          ParsePoligons(ptr);
         }
       }
     }
-    fclose(file);
-
-  } else {
-    status = 1;
-  }
+    file.close();
+//  } else {
+//    status = 1;
+//  }
 
   return status;
 }

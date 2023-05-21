@@ -31,7 +31,7 @@ class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
 //      free(res);
 //    }
   }
-  std::pair<std::vector<double>, std::vector<unsigned>> res;
+  std::pair<double*, unsigned*> res;
   std::pair<unsigned , unsigned> size;
   QPoint mPos;
   double point_thickness = 0;

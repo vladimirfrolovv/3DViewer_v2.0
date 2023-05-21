@@ -2,9 +2,10 @@
 namespace s21 {
 
     class Controller {
+    public:
         Controller(){model = new Model;}
         ~Controller(){delete model;}
-        std::pair<std::vector<double>, std::vector<unsigned>> GetPair(std::string filename);
+        std::pair<double*, unsigned*> GetPair(std::string filename);
         std::pair<unsigned ,unsigned> GetModelSize(){
             return model->GetSize();
         }
