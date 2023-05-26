@@ -5,7 +5,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-  controller = new s21::Controller;
   ui->scale_slider->setSliderPosition(50);
   ui->scale_line_edit->setText("50");
   ui->x_move->setText("0");
@@ -20,28 +19,21 @@ MainWindow::MainWindow(QWidget *parent)
   ui->x_rotate_slider->setSliderPosition(0);
   ui->y_rotate_slider->setSliderPosition(0);
   ui->z_rotate_slider->setSliderPosition(0);
-  previous_value_slider_x = 0;
-  previous_value_slider_y = 0;
-  previous_value_slider_z = 0;
-  previous_value_rotate_x = 0;
-  previous_value_rotate_y = 0;
-  previous_value_rotate_z = 0;
-  previous_scale = 50.0;
-  // settings
-  //  load_setting();
-  //  QSettings settings("settings.ini", QSettings::IniFormat);
-  //  settings.beginGroup("Settings");
-
-  //  ui->widget->background_color.setRedF(
-  //      settings.value("save_Color_redF").toFloat());
-  //  ui->widget->background_color.setGreenF(
-  //      settings.value("save_Color_greenF").toFloat());
-  //  ui->widget->background_color.setBlueF(
-  //      settings.value("save_Color_blueF").toFloat());
-  //  settings.endGroup();
+  previous_value_slider_x_ = 0;
+  previous_value_slider_y_ = 0;
+  previous_value_slider_z_ = 0;
+  previous_value_rotate_x_ = 0;
+  previous_value_rotate_y_ = 0;
+  previous_value_rotate_z_ = 0;
+  previous_scale_ = 50.0;
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  delete timer_;
+  delete frame_;
+  delete gif_;
+}
 
 void MainWindow::get_position(int x) {
   ui->label_vertex->setText(QString::number(x));
@@ -49,16 +41,19 @@ void MainWindow::get_position(int x) {
 
 void MainWindow::on_EditFile_clicked() {
   QString str =
-      QFileDialog::getOpenFileName(this, "Open file", "/Users", "*.obj");
+      QFileDialog::getOpenFileName(this, "Open file", "/Users/", "*.obj");
   ui->filepath->setText(str);
   std::string v_str = str.toStdString();
-
-  ui->widget->res = controller->GetPair(v_str);
-  ui->widget->size = controller->GetModelSize();
-//  QString buf_line = QString::number(st->amount_struct_pol / 2 / 2);
-//  ui->label_line->setText(buf_line);
-//  buf_line = QString::number(st->amount_struct_ver / 3);
-//  ui->label_vertex->setText(buf_line);
+  ui->widget->res = s21::Singleton::Instance()->GetController()->GetPair(v_str);
+  ui->widget->size =
+      s21::Singleton::Instance()->GetController()->GetModelSize();
+  QString buf_line = QString::number(
+      s21::Singleton::Instance()->GetController()->GetModelSize().second / 2 /
+      2);
+  ui->label_line->setText(buf_line);
+  buf_line = QString::number(
+      s21::Singleton::Instance()->GetController()->GetModelSize().first / 3);
+  ui->label_vertex->setText(buf_line);
 }
 
 void MainWindow::on_scale_line_edit_returnPressed() {
@@ -84,10 +79,11 @@ void MainWindow::on_x_rotate_returnPressed() {
     value = -100;
     ui->x_rotate->setText(QString::number(-100));
   }
-  double radian = (value - previous_value_rotate_x) * (M_PI / 45.0);
-  previous_value_rotate_x = (int)value;
+  double radian = (value - previous_value_rotate_x_) * (M_PI / 45.0);
+  previous_value_rotate_x_ = (int)value;
   ui->x_rotate_slider->setValue((int)value);
-  controller->RotateModelX(radian);
+  char x = 'x';
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, x);
   ui->widget->update();
 }
 
@@ -101,10 +97,11 @@ void MainWindow::on_y_rotate_returnPressed() {
     value = -100;
     ui->y_rotate->setText(QString::number(-100));
   }
-  double radian = (value - previous_value_rotate_y) * (M_PI / 45.0);
-  previous_value_rotate_y = (int)value;
+  double radian = (value - previous_value_rotate_y_) * (M_PI / 45.0);
+  previous_value_rotate_y_ = (int)value;
   ui->y_rotate_slider->setValue((int)value);
-  controller->RotateModelY(radian);
+  char y = 'y';
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, y);
   ui->widget->update();
 }
 
@@ -118,10 +115,11 @@ void MainWindow::on_z_rotate_returnPressed() {
     value = -100;
     ui->z_rotate->setText(QString::number(-100));
   }
-  double radian = (value - previous_value_rotate_z) * (M_PI / 45.0);
-  previous_value_rotate_z = (int)value;
+  double radian = (value - previous_value_rotate_z_) * (M_PI / 45.0);
+  previous_value_rotate_z_ = (int)value;
   ui->z_rotate_slider->setValue((int)value);
-  controller->RotateModelZ(radian);
+  char z = 'z';
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, z);
   ui->widget->update();
 }
 
@@ -135,8 +133,9 @@ void MainWindow::on_x_move_returnPressed() {
     a = -100;
     ui->x_move->setText(QString::number(-100));
   }
-  controller->MoveModel( (a - previous_value_slider_x) * 0.01, 'x');
-  previous_value_slider_x = (int)a;
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (a - previous_value_slider_x_) * 0.01, 'x');
+  previous_value_slider_x_ = (int)a;
   ui->x_move_slider->setValue((int)a);
   ui->widget->update();
 }
@@ -151,8 +150,9 @@ void MainWindow::on_y_move_returnPressed() {
     a = -100;
     ui->y_move->setText(QString::number(-100));
   }
-    controller->MoveModel( (a - previous_value_slider_y) * 0.01, 'y');
-  previous_value_slider_y = (int)a;
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (a - previous_value_slider_y_) * 0.01, 'y');
+  previous_value_slider_y_ = (int)a;
   ui->y_move_slider->setValue((int)a);
   ui->widget->update();
 }
@@ -167,8 +167,9 @@ void MainWindow::on_z_move_returnPressed() {
     a = -100;
     ui->z_move->setText(QString::number(-100));
   }
-    controller->MoveModel( (a - previous_value_slider_z) * 0.01, 'z');
-  previous_value_rotate_z = (int)a;
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (a - previous_value_slider_z_) * 0.01, 'z');
+  previous_value_rotate_z_ = (int)a;
   ui->z_move_slider->setValue((int)a);
   ui->widget->update();
 }
@@ -192,20 +193,20 @@ void MainWindow::on_comboBox_3_activated(int index) {
 }
 
 void MainWindow::on_scale_slider_sliderMoved(int position) {
-  if ((position - previous_scale) < 0) {
-    for (int i = 0; i < previous_scale - position; i++) {
-        controller->SetModelScale( 0.9);
+  if ((position - previous_scale_) < 0) {
+    for (int i = 0; i < previous_scale_ - position; i++) {
+      s21::Singleton::Instance()->GetController()->SetModelScale(0.9);
       ui->widget->update();
     }
 
-    previous_scale = position;
+    previous_scale_ = position;
 
-  } else if ((position - previous_scale) > 0) {
-    for (int i = 0; i < position - previous_scale; i++) {
-        controller->SetModelScale( 1.1111);
+  } else if ((position - previous_scale_) > 0) {
+    for (int i = 0; i < position - previous_scale_; i++) {
+      s21::Singleton::Instance()->GetController()->SetModelScale(1.1111);
       ui->widget->update();
     }
-    previous_scale = position;
+    previous_scale_ = position;
   }
   ui->scale_line_edit->setText(QString::number(position));
 }
@@ -238,39 +239,40 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position) {
 }
 
 void MainWindow::on_reset_clicked() {
-//  QString str = ui->filepath->text();
-//  std::string v_str = str.toStdString();
-//  const char *strch = v_str.c_str();
-//  auto s = const_cast<char *>(strch);
-//
-//  exit_st *st = (exit_st *)calloc(1, sizeof(exit_st));
-//  s21_parse(st, s);
-//  setting_to_center(st);
-//  double scale = normalize(st);
-//  set_scale(st, scale);
-//  ui->widget->res = st;
-//  ui->scale_slider->setValue(50);
-//  ui->scale_line_edit->setText(QString::number(50));
-//  previous_scale = 50;
-//  previous_value_rotate_x = 0;
-//  previous_value_rotate_y = 0;
-//  previous_value_rotate_z = 0;
-//  previous_value_slider_x = 0;
-//  previous_value_slider_y = 0;
-//  previous_value_slider_z = 0;
-//  ui->x_move_slider->setValue(0);
-//  ui->y_move_slider->setValue(0);
-//  ui->z_move_slider->setValue(0);
-//  ui->x_rotate_slider->setValue(0);
-//  ui->y_rotate_slider->setValue(0);
-//  ui->z_rotate_slider->setValue(0);
-//  ui->x_move->setText(QString::number(0));
-//  ui->y_move->setText(QString::number(0));
-//  ui->z_move->setText(QString::number(0));
-//  ui->x_rotate->setText(QString::number(0));
-//  ui->y_rotate->setText(QString::number(0));
-//  ui->z_rotate->setText(QString::number(0));
-//  ui->widget->update();
+  QString str = ui->filepath->text();
+  std::string v_str = str.toStdString();
+  ui->widget->res = s21::Singleton::Instance()->GetController()->GetPair(v_str);
+  ui->widget->size =
+      s21::Singleton::Instance()->GetController()->GetModelSize();
+  QString buf_line = QString::number(
+      s21::Singleton::Instance()->GetController()->GetModelSize().second / 2 /
+      2);
+  ui->label_line->setText(buf_line);
+  buf_line = QString::number(
+      s21::Singleton::Instance()->GetController()->GetModelSize().first / 3);
+  ui->label_vertex->setText(buf_line);
+  ui->scale_slider->setValue(50);
+  ui->scale_line_edit->setText(QString::number(50));
+  previous_scale_ = 50;
+  previous_value_rotate_x_ = 0;
+  previous_value_rotate_y_ = 0;
+  previous_value_rotate_z_ = 0;
+  previous_value_slider_x_ = 0;
+  previous_value_slider_y_ = 0;
+  previous_value_slider_z_ = 0;
+  ui->x_move_slider->setValue(0);
+  ui->y_move_slider->setValue(0);
+  ui->z_move_slider->setValue(0);
+  ui->x_rotate_slider->setValue(0);
+  ui->y_rotate_slider->setValue(0);
+  ui->z_rotate_slider->setValue(0);
+  ui->x_move->setText(QString::number(0));
+  ui->y_move->setText(QString::number(0));
+  ui->z_move->setText(QString::number(0));
+  ui->x_rotate->setText(QString::number(0));
+  ui->y_rotate->setText(QString::number(0));
+  ui->z_rotate->setText(QString::number(0));
+  ui->widget->update();
 }
 
 void MainWindow::on_horizontalSlider_2_valueChanged(int value) {
@@ -280,47 +282,50 @@ void MainWindow::on_horizontalSlider_2_valueChanged(int value) {
 }
 
 void MainWindow::on_x_move_slider_valueChanged(int value) {
-    controller->MoveModel((value - previous_value_slider_x) * 0.01, 'x');
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (value - previous_value_slider_x_) * 0.01, 'x');
   ui->x_move->setText(QString::number(value));
-  previous_value_slider_x = value;
+  previous_value_slider_x_ = value;
   ui->widget->update();
 }
 
 void MainWindow::on_y_move_slider_valueChanged(int value) {
-    controller->MoveModel((value - previous_value_slider_y) * 0.01, 'y');
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (value - previous_value_slider_y_) * 0.01, 'y');
   ui->y_move->setText(QString::number(value));
-  previous_value_slider_y = value;
+  previous_value_slider_y_ = value;
   ui->widget->update();
 }
 
 void MainWindow::on_z_move_slider_valueChanged(int value) {
-    controller->MoveModel((value - previous_value_slider_z) * 0.01, 'z');
+  s21::Singleton::Instance()->GetController()->MoveModel(
+      (value - previous_value_slider_z_) * 0.01, 'z');
   ui->z_move->setText(QString::number(value));
-  previous_value_slider_z = value;
+  previous_value_slider_z_ = value;
   ui->widget->update();
 }
 
 void MainWindow::on_x_rotate_slider_valueChanged(int value) {
-  double radian = (value - previous_value_rotate_x) * (M_PI / 45.0);
-    controller->RotateModelX(radian);
+  double radian = (value - previous_value_rotate_x_) * (M_PI / 45.0);
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, 'x');
   ui->x_rotate->setText(QString::number(value));
-  previous_value_rotate_x = value;
+  previous_value_rotate_x_ = value;
   ui->widget->update();
 }
 
 void MainWindow::on_y_rotate_slider_valueChanged(int value) {
-  double radian = (value - previous_value_rotate_y) * (M_PI / 45.0);
-    controller->RotateModelY(radian);
+  double radian = (value - previous_value_rotate_y_) * (M_PI / 45.0);
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, 'y');
   ui->y_rotate->setText(QString::number(value));
-  previous_value_rotate_y = value;
+  previous_value_rotate_y_ = value;
   ui->widget->update();
 }
 
 void MainWindow::on_z_rotate_slider_valueChanged(int value) {
-  double radian = (value - previous_value_rotate_z) * (M_PI / 45.0);
-    controller->RotateModelZ(radian);
+  double radian = (value - previous_value_rotate_z_) * (M_PI / 45.0);
+  s21::Singleton::Instance()->GetController()->RotateModel(radian, 'z');
   ui->z_rotate->setText(QString::number(value));
-  previous_value_rotate_z = value;
+  previous_value_rotate_z_ = value;
   ui->widget->update();
 }
 
@@ -335,45 +340,46 @@ void MainWindow::on_Choice_points_activated(int index) {
 void MainWindow::on_pushButton_4_clicked() {
   if (!ui->filepath->text().isEmpty()) {
     int option = ui->comboBox_2->currentIndex();
-    frame = new QImage;
+    frame_ = new QImage;
     if (option == 2) {
-      gif = new QGifImage;
-      timer = new QTimer(this);
-      time = 0;
-      connect(timer, SIGNAL(timeout()), this, SLOT(saveGifFrame()));
+      gif_ = new QGifImage;
+      timer_ = new QTimer(this);
+      time_ = 0;
+      connect(timer_, SIGNAL(timeout()), this, SLOT(saveGifFrame()));
       ui->pushButton_4->setDisabled(true);
-      timer->start(10);
+      timer_->start(10);
     } else if (option == 1) {
-      *frame = ui->widget->grabFramebuffer();
+      *frame_ = ui->widget->grabFramebuffer();
       QString img =
           QFileDialog::getSaveFileName(this, NULL, NULL, "BPM (*.bmp)");
-      frame->save(img);
+      frame_->save(img);
     } else if (option == 0) {
-      *frame = ui->widget->grab().toImage();
+      *frame_ = ui->widget->grab().toImage();
       QString img =
           QFileDialog::getSaveFileName(this, NULL, NULL, "JPEG (*.jpeg)");
-      frame->save(img);
+      frame_->save(img);
     }
   }
 }
 
 void MainWindow::saveGifFrame() {
-  time++;
-  *frame = ui->widget->grab().toImage();
-//  rotation_y(M_PI / 25.0, ui->widget->res);
+  time_++;
+  *frame_ = ui->widget->grab().toImage();
+  s21::Singleton::Instance()->GetController()->RotateModel(M_PI / 25.0, 'y');
   ui->widget->update();
-  gif->addFrame(*frame, 100);
-  if (time >= 50) {
-    timer->stop();
-    gifSavePath = QFileDialog::getSaveFileName(this, NULL, NULL, "GIF (*.gif)");
-    if (!gifSavePath.isNull()) {
-      gif->save(gifSavePath);
+  gif_->addFrame(*frame_, 100);
+  if (time_ >= 50) {
+    timer_->stop();
+    gif_save_path_ =
+        QFileDialog::getSaveFileName(this, NULL, NULL, "GIF (*.gif)");
+    if (!gif_save_path_.isNull()) {
+      gif_->save(gif_save_path_);
       ui->pushButton_4->setEnabled(true);
     };
   }
 }
 
-void MainWindow::load_setting() {
+void MainWindow::LoadSetting() {
   QSettings settings("settings.ini", QSettings::IniFormat);
   settings.beginGroup("Settings");
 
@@ -462,6 +468,6 @@ void MainWindow::on_Save_set_clicked() {
 }
 
 void MainWindow::on_load_set_but_clicked() {
-  load_setting();
+  LoadSetting();
   ui->widget->update();
 }

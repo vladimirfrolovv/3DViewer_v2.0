@@ -2,30 +2,35 @@
 
 namespace s21 {
 
-int Model::Parse(std ::string filename) {
+void Model::Parse(std::string filename) {
   setlocale(LC_ALL, "en-US");
   setlocale(LC_NUMERIC, "C");
-  int status = 0;
+  if (!vertex_vector_.empty()) {
+    vertex_vector_.clear();
+  }
+  if (!polygons_vector_.empty()) {
+    polygons_vector_.clear();
+  }
   std::string line;
   std::ifstream file(filename);
-  //  if (file) {
-  char *ptr = nullptr;
-  if (!status) {
+  if (file) {
+    minmaxX_[0] = 0;
+    minmaxX_[1] = 0;
+    minmaxY_[0] = 0;
+    minmaxY_[1] = 0;
+    minmaxZ_[0] = 0;
+    minmaxZ_[1] = 0;
+    char *ptr = nullptr;
     while (getline(file, line)) {
       ptr = const_cast<char *>(line.c_str());
       if (*ptr == 'v') {
         ParseVertex(ptr);
       } else if (*ptr == 'f') {
-        ParsePoligons(ptr);
+        ParsePolygons(ptr);
       }
     }
+    file.close();
   }
-  file.close();
-  //  } else {
-  //    status = 1;
-  //  }
-
-  return status;
 }
 
 void Model::ParseVertex(char *ptr) {
@@ -36,8 +41,8 @@ void Model::ParseVertex(char *ptr) {
       if (!isdigit(*ptr) && *ptr != '-') {
         ptr++;
       } else {
-        vertex.push_back(strtod(ptr, &ptr));
-        MinMaxCoord(counter_axis, vertex.back());
+        vertex_vector_.push_back(strtod(ptr, &ptr));
+        MinMaxCoord(counter_axis, vertex_vector_.back());
         counter_axis++;
         while (*ptr == ' ') {
           ptr++;
@@ -47,22 +52,22 @@ void Model::ParseVertex(char *ptr) {
   }
 }
 
-void Model::ParsePoligons(char *ptr) {
+void Model::ParsePolygons(char *ptr) {
   ptr++;
-  int counter_first_pol = 0, first_poligon = 0, tmp_pol = 0;
+  int counter_first_pol = 0, first_polygon = 0, tmp_pol = 0;
   if (*ptr == ' ') {
     while (*ptr != '\0') {
       if (!isdigit(*ptr)) {
         ptr++;
       } else {
         if (counter_first_pol == 0) {
-          poligons.push_back(strtol(ptr, &ptr, 0) - 1);
-          first_poligon = poligons.back();
+          polygons_vector_.push_back(strtol(ptr, &ptr, 0) - 1);
+          first_polygon = polygons_vector_.back();
           counter_first_pol++;
         } else {
           tmp_pol = strtol(ptr, &ptr, 0) - 1;
-          poligons.push_back(tmp_pol);
-          poligons.push_back(tmp_pol);
+          polygons_vector_.push_back(tmp_pol);
+          polygons_vector_.push_back(tmp_pol);
         }
         while (*ptr != '\0' && *ptr != ' ') {
           ptr++;
@@ -70,36 +75,36 @@ void Model::ParsePoligons(char *ptr) {
       }
     }
   }
-  poligons.push_back(first_poligon);
+  polygons_vector_.push_back(first_polygon);
 }
 
 void Model::MinMaxCoord(int counter_axis, double coord) {
   if (counter_axis == 0) {
-    if (minmaxX[0] > coord) {
-      minmaxX[0] = coord;
+    if (minmaxX_[0] > coord) {
+      minmaxX_[0] = coord;
     }
-    if (minmaxX[1] < coord) {
-      minmaxX[1] = coord;
+    if (minmaxX_[1] < coord) {
+      minmaxX_[1] = coord;
     }
   } else if (counter_axis == 1) {
-    if (minmaxY[0] > coord) {
-      minmaxY[0] = coord;
+    if (minmaxY_[0] > coord) {
+      minmaxY_[0] = coord;
     }
-    if (minmaxY[1] < coord) {
-      minmaxY[1] = coord;
+    if (minmaxY_[1] < coord) {
+      minmaxY_[1] = coord;
     }
   } else if (counter_axis == 2) {
-    if (minmaxZ[0] > coord) {
-      minmaxZ[0] = coord;
+    if (minmaxZ_[0] > coord) {
+      minmaxZ_[0] = coord;
     }
-    if (minmaxZ[1] < coord) {
-      minmaxZ[1] = coord;
+    if (minmaxZ_[1] < coord) {
+      minmaxZ_[1] = coord;
     }
   }
 }
 
 void Model::RotationX(double angle) {
-  for (unsigned i = 0; i < vertex.size(); i += 3) {
+  for (unsigned i = 0; i < vertex_vector_.size(); i += 3) {
     double temp_y = vertex_[i + 1];
     double temp_z = vertex_[i + 2];
     vertex_[i + 1] = cos(angle) * temp_y + sin(angle) * temp_z;
@@ -108,7 +113,7 @@ void Model::RotationX(double angle) {
 }
 
 void Model::RotationY(double angle) {
-  for (unsigned i = 0; i < vertex.size(); i += 3) {
+  for (unsigned i = 0; i < vertex_vector_.size(); i += 3) {
     double temp_x = vertex_[i];
     double temp_z = vertex_[i + 2];
     vertex_[i] = cos(angle) * temp_x + sin(angle) * temp_z;
@@ -117,7 +122,7 @@ void Model::RotationY(double angle) {
 }
 
 void Model::RotationZ(double angle) {
-  for (unsigned i = 0; i < vertex.size(); i += 3) {
+  for (unsigned i = 0; i < vertex_vector_.size(); i += 3) {
     double temp_x = vertex_[i];
     double temp_y = vertex_[i + 1];
     vertex_[i] = cos(angle) * temp_x - sin(angle) * temp_y;
@@ -126,64 +131,69 @@ void Model::RotationZ(double angle) {
 }
 
 void Model::SettingToCenter() {
-  double centX = minmaxX[0] + (minmaxX[1] - minmaxX[0]) / 2;
-  double centY = minmaxY[0] + (minmaxY[1] - minmaxY[0]) / 2;
-  double centZ = minmaxZ[0] + (minmaxZ[1] - minmaxZ[0]) / 2;
-  for (unsigned i = 0; i < vertex.size(); i += 3) {
-    vertex[i] -= centX;
-    vertex[i + 1] -= centY;
-    vertex[i + 2] -= centZ;
+  double centX = minmaxX_[0] + (minmaxX_[1] - minmaxX_[0]) / 2;
+  double centY = minmaxY_[0] + (minmaxY_[1] - minmaxY_[0]) / 2;
+  double centZ = minmaxZ_[0] + (minmaxZ_[1] - minmaxZ_[0]) / 2;
+  for (unsigned i = 0; i < vertex_vector_.size(); i += 3) {
+    vertex_[i] -= centX;
+    vertex_[i + 1] -= centY;
+    vertex_[i + 2] -= centZ;
   }
 }
 void Model::SetScale(double scale) {
-  for (unsigned i = 0; i < vertex.size(); i++) {
+  for (unsigned i = 0; i < vertex_vector_.size(); i++) {
     vertex_[i] *= scale;
   }
 }
 
-void Model::Move(double a, char axis) {
-  for (unsigned i = 0; i < vertex.size(); i += 3) {
-    if (axis == 'x')
-      vertex_[i] += a;
-    else if (axis == 'y')
-      vertex_[i + 1] += a;
-    else if (axis == 'z')
-      vertex_[i + 2] += a;
+void Model::Move(double a, unsigned i) {
+  for (; i < vertex_vector_.size(); i += 3) {
+    vertex_[i] += a;
   }
 }
 
 double Model::Normalize() {
-  double x = minmaxX[1] - minmaxX[0];
-  double y = minmaxY[1] - minmaxY[0];
-  double z = minmaxZ[1] - minmaxZ[0];
+  double x = minmaxX_[1] - minmaxX_[0];
+  double y = minmaxY_[1] - minmaxY_[0];
+  double z = minmaxZ_[1] - minmaxZ_[0];
   double d = fmax(fmax(x, y), z);
   double value = 0.5;
   double scale = (value - (value * (-1))) / d;
   return scale;
 }
 void Model::Converter() {
-  vertex_ = new double[vertex.size()]();
+  if (vertex_ != nullptr) {
+    delete vertex_;
+    vertex_ = nullptr;
+  }
+  if (polygons_ != nullptr) {
+    delete polygons_;
+    polygons_ = nullptr;
+  }
+  vertex_ = new double[vertex_vector_.size()]();
   int i = 0;
-  for (auto it : vertex) {
+  for (auto it : vertex_vector_) {
     vertex_[i] = it;
     i++;
   }
-  poligons_ = new unsigned[poligons.size()]();
+  polygons_ = new unsigned[polygons_vector_.size()]();
   int j = 0;
-  for (auto it : poligons) {
-    poligons_[j] = it;
+  for (auto it : polygons_vector_) {
+    polygons_[j] = it;
     j++;
   }
 }
-std::pair<double *, unsigned *> Model::GetArr() {
-    SettingToCenter();
 
-    Converter();
-    double scale = Normalize();
-    SetScale(scale);
-  return std::pair<double *, unsigned *>(vertex_, poligons_);
+std::pair<double *, unsigned *> Model::GetArr() {
+  Converter();
+  SettingToCenter();
+  double scale = Normalize();
+  SetScale(scale);
+
+  return std::pair<double *, unsigned *>(vertex_, polygons_);
 }
 std::pair<unsigned, unsigned> Model::GetSize() {
-  return std::pair<unsigned, unsigned>(vertex.size(), poligons.size());
+  return std::pair<unsigned, unsigned>(vertex_vector_.size(),
+                                       polygons_vector_.size());
 }
 }  // namespace s21

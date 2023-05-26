@@ -1,8 +1,5 @@
-#ifndef MYOPENGL_H
-#define MYOPENGL_H
-
-#include "View/mainwindow.h"
-#include <stdlib.h>
+#ifndef CPP4_3D_VIEWER_V2_0_1_SRC_MYOPENGL_H_
+#define CPP4_3D_VIEWER_V2_0_1_SRC_MYOPENGL_H_
 
 #include <QColor>
 #include <QGraphicsSceneMouseEvent>
@@ -11,7 +8,7 @@
 #include <QOpenGLWidget>
 #include <QThread>
 
-//#include "s21_3DViewer.h"
+#include "View/mainwindow.h"
 
 class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
  public:
@@ -25,20 +22,15 @@ class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
   int striple = 0;
   int proection = 0;
   int form_points = 0;
-  ~Myopengl() {
-//    if (res) {
-//      s21_remove_struct(res);
-//      free(res);
-//    }
-  }
-  std::pair<double*, unsigned*> res;
-  std::pair<unsigned , unsigned> size;
+  ~Myopengl() {}
+  std::pair<double *, unsigned *> res;
+  std::pair<unsigned, unsigned> size;
   QPoint mPos;
   double point_thickness = 0;
 
  protected:
-  void point_setting();
-  void striple_setting();
+  void PointSetting();
+  void StripleSetting();
   void initializeGL() override;
   void resizeGL(int w, int h) override;
   void paintGL() override;
@@ -48,4 +40,4 @@ class Myopengl : public QOpenGLWidget, public QOpenGLFunctions {
   void mouseMoveEvent(QMouseEvent *) override;
 };
 
-#endif  // MYOPENGL_H
+#endif  // CPP4_3D_VIEWER_V2_0_1_SRC_MYOPENGL_H_

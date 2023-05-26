@@ -1,26 +1,17 @@
 #include "controller.h"
 
-namespace s21{
-    std::pair<double*, unsigned*> Controller::GetPair(std::string filename){
-        model->Parse(filename);
-        return model->GetArr();
-    }
-    std::pair<unsigned ,unsigned> Controller::GetModelSize(){
-        return model->GetSize();
-    }
-    void Controller::RotateModelX(double angle){
-        model->RotationX(angle);
-    }
-    void Controller::RotateModelY(double angle){
-        model->RotationY(angle);
-    }
-    void Controller::RotateModelZ(double angle){
-        model->RotationZ(angle);
-    }
-    void Controller::SetModelScale(double scale){
-        model->SetScale(scale);
-    }
-    void Controller::MoveModel(double value, char axis) {
-        model->Move(value,axis);
-    }
+namespace s21 {
+std::pair<double*, unsigned*> Controller::GetPair(std::string filename) {
+  return adapter_->Convert(model_, filename);
 }
+std::pair<unsigned, unsigned> Controller::GetModelSize() {
+  return model_->GetSize();
+}
+void Controller::RotateModel(double angle, char axis) {
+  facade_->RotateModel(model_, angle, axis);
+}
+void Controller::MoveModel(double value, char axis) {
+  facade_->MoveModel(model_, value, axis);
+}
+void Controller::SetModelScale(double scale) { model_->SetScale(scale); }
+}  // namespace s21

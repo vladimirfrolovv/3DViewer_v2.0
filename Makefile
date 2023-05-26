@@ -1,62 +1,57 @@
-CC=gcc -std=c11 -g
-CFLAGS=-Wall -Werror -Wextra
-GCOVFLAGS = -fprofile-arcs -ftest-coverage
-SRCS=$(wildcard s21_*.c)
-OBJS=$(SRCS:.c=.o)
-TESTSFLAGS_MAC= -lcheck 
-# -lpthread -lsubunit -lrt -lm
-LIB_NAME=3d_viewer
+CC = g++ -std=c++17 -g
+CFLAGS = -Wall -Werror -Wextra
+TESTSFLAGS_MAC = -lgtest -lgtest_main
+
+UNAME = $(shell uname)
+
+OPEN :=
+
+ifeq ($(UNAME), Linux)
+	OPEN += xdg-open
+endif
+
+ifeq ($(UNAME), Darwin)
+	OPEN += open
+endif
 
 all: install
 
-to_style:
-	clang-format -style=google -i *.c *.cpp *.h
+clang-format:
+	clang-format -style=google -i tests/*.cc Model/*.cc Model/*.h Controller/*.cc Controller/*.h View/*.cc View/*.h *.cc *.h
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+style:
+	clang-format -style=google -n tests/*.cc Model/*.cc Model/*.h Controller/*.cc Controller/*.h View/*.cc View/*.h *.cc *.h
 
 dvi:
-	doxygen 
-	open html/index.html
+	doxygen
+	@$(OPEN) html/index.html
 
-$(LIB_NAME).a: $(OBJS)
-	ar rc $(LIB_NAME).a $^
-	ranlib $(LIB_NAME).a
-	rm -rf *.o
+install:
+	@mkdir Qmake
+	@cd Qmake/ && qmake ../Viewer.pro && make
 
-install: 
-	mkdir Qmake
-	cd Qmake/ && qmake ../Viewer.pro && make 
-	
 open:
-	open Qmake/Viewer.app/Contents/MacOS/./Viewer
+	@$(OPEN) Qmake/Viewer.app/Contents/MacOS/./Viewer
 
 uninstall:
-	rm -rf Qmake
+	@rm -rf Viewer.app
+	@rm -rf Qmake
 
 dist:
 	mkdir Viewer
-	cp -r *.c *.h *.cpp *.ui *.pro Makefile tests/ Viewer
+	@cp -r Model/*.cc Model/*.h Controller/*.cc Controller/*.h View/*.cc View/*.h *.cc *.h View/*.ui *.pro Makefile tests/ Doxyfile Viewer
 	tar -cvzf dist.tar.gz Viewer
-	-rm -rf Viewer
+	@-rm -rf Viewer
 
+SOURCE = ./Model/*.cc ./Controller/*.cc
 
-tests: $(LIB_NAME).a 
-	$(CC) $(CFLAGS) tests/test.c -L. $(LIB_NAME).a $(TESTSFLAGS_MAC) -o test
-	./test
-
-
-add_coverage_flag:
-	$(eval CFLAGS += --coverage)
-
-gcov_report: add_coverage_flag tests
-	./test
-	lcov -t "test" -o Coverage_Report.info -c -d .
-	genhtml -o ./report Coverage_Report.info
-	rm -f *.gcno *.gcda *.info report.out *.gcov *.a
-	open ./report/index-sort-f.html
+tests:
+	$(CC) $(CFLAGS) tests/tests_model.cc $(SOURCE) $(TESTSFLAGS_MAC) -o test
+	@./test
 
 clean:
-	rm -rf *.o test *.a *.gcno *.gcda *.gcov *.html *.css *.out *.info report Qmake html dist.tar.gz Viewer
+	@rm -rf *.o test *.a *.gcno *.gcda *.gcov *.html *.css *.out *.info report Qmake html dist.tar.gz Viewer test.dSYM
 
-rebuild: clean all 
+rebuild: clean all
+
+.PHONY: tests clang-format

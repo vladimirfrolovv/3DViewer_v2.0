@@ -1,8 +1,6 @@
 #include "myopengl.h"
 
-#include <QMoveEvent>
-Myopengl::Myopengl(QWidget *parent) : QOpenGLWidget{parent} {
-}
+Myopengl::Myopengl(QWidget *parent) : QOpenGLWidget{parent} {}
 
 void Myopengl::initializeGL() {
   initializeOpenGLFunctions();
@@ -20,11 +18,9 @@ void Myopengl::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnableClientState(GL_VERTEX_ARRAY);
   glLineWidth(thickness);
-//  set_scale(res, scale);
-  striple_setting();
-
+  s21::Singleton::Instance()->GetController()->SetModelScale(scale);
+  StripleSetting();
   glColor3f(line_color.redF(), line_color.greenF(), line_color.blueF());
-
   glPointSize(point_thickness);
 
   if (proection == 1) {
@@ -39,22 +35,24 @@ void Myopengl::paintGL() {
     glTranslatef(0, 0, 0);
   }
   glVertexPointer(3, GL_DOUBLE, 0, res.first);
-
-  glDrawElements(GL_LINES, size.second, GL_UNSIGNED_INT,
-                 res.second);
+  glDrawElements(GL_LINES, size.second, GL_UNSIGNED_INT, res.second);
 
   if (form_points != 0) {
-    point_setting();
-    glDrawElements(GL_POINTS, size.first, GL_UNSIGNED_INT,
-                   res.first);
+    PointSetting();
+    glDrawElements(GL_POINTS, size.second, GL_UNSIGNED_INT, res.second);
   }
+
   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Myopengl::mouseMoveEvent(QMouseEvent *mo) {
   scale = 1;
-  rotation_x(0.001 / M_PI * (mo->pos().y() - mPos.y()), res);
-  rotation_y((0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, res);
+  char x = 'x';
+  char y = 'y';
+  s21::Singleton::Instance()->GetController()->RotateModel(
+      0.001 / M_PI * (mo->pos().y() - mPos.y()), x);
+  s21::Singleton::Instance()->GetController()->RotateModel(
+      (0.001 / M_PI * (mo->pos().x() - mPos.x())) * -1, y);
   update();
 }
 
@@ -63,7 +61,7 @@ void Myopengl::mousePressEvent(QMouseEvent *mo) {
   mPos = mo->pos();
 }
 
-void Myopengl::striple_setting() {
+void Myopengl::StripleSetting() {
   if (striple == 1) {
     glEnable(GL_LINE_STIPPLE);
     glLineStipple(1, 0x0101);
@@ -72,7 +70,7 @@ void Myopengl::striple_setting() {
   }
 }
 
-void Myopengl::point_setting() {
+void Myopengl::PointSetting() {
   glColor3d(points_color.redF(), points_color.greenF(), points_color.blueF());
   if (form_points == 2) {
     glEnable(GL_POINT_SMOOTH);

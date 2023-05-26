@@ -1,5 +1,5 @@
-#ifndef SRC_S21_3DVIEWER_H_
-#define SRC_S21_3DVIEWER_H_
+#ifndef CPP4_3D_VIEWER_V2_0_1_SRC_MODEL_MODEL_H_
+#define CPP4_3D_VIEWER_V2_0_1_SRC_MODEL_MODEL_H_
 
 #include <locale.h>
 
@@ -8,83 +8,108 @@
 #include <fstream>
 #include <vector>
 
+/*! \mainpage 3DViewer_v2.0 Documentation
+ *
+ * \section Project Description
+ * There is an implementation of a program to visualise the 3D wireframe models.
+ * The program is developed in C++ language of C++17 standard
+ * and implemented using the MVC pattern.
+ *
+ * The program provides the ability to:\n
+ * 1) load a wireframe model from an obj file;\n
+ * 2) translate the model by a given distance in relation to the X, Y, Z axes;\n
+ * 3) rotate the model by a given angle in relation to its X, Y, Z axes;\n
+ * 4) scale the model by a given value.\n\n
+ *
+ * Graphical user interface contains:\n
+ * 1) button to select the model file and a field to output its name;\n
+ * 2) visualisation area for the wireframe model;\n
+ * 3) button and input field for translating the model;\n
+ * 4) button and input field for rotating the model;\n
+ * 5) button and input field for scaling the model.\n\n
+ *
+ * The program allows customizing the type of projection (parallel and central),
+ * setting up the type (solid, dashed), color and thickness of the edges,
+ * display method (none, circle, square), color and size of the vertices.
+ * It also allows choosing the background color.
+ * Settings is saved between program restarts.
+ *
+ * The program allows saving the captured (rendered) images as bmp and jpeg
+ * files and recording small screencast by a special button.
+ *
+ * \section Commands
+ * Run "make" or "make all" to build the application.\n
+ * Run "make install" to install the application on your PC.\n
+ * Run "make uninstall" to uninstall the application.\n
+ * Run "make dvi" to get this documentation.\n
+ * Run "make dist" to archive the application.\n
+ * Run "make tests" to run the tests.\n
+ */
 namespace s21 {
-
 class Model {
  public:
   /// @brief Main function of parsing obj file and make
-  /// @param st exit struct with data
   /// @param filename name obj file
   /// @return error
-  int Parse(std ::string filename);
+  void Parse(std ::string filename);
   /// @brief function for parse coordinates point
-  /// @param vertex_counter
   /// @param ptr pointer for current line
-  /// @param st struct
-  /// @param capacity_ver current capacity array of coordinates
-  /// @return error
   void ParseVertex(char* ptr);
-  /// @brief function for parse poligons
+  /// @brief function for parse polygons
   /// @param ptr pointer for current line
-  /// @param st struct
-  /// @param poligons_counter counter current amount poligons
-  /// @param capacity_pol current capacity array of poligons
-  /// @return error
-  void ParsePoligons(char* ptr);
-  /// @brief functoin for find max and min coordinates of all axis
-  /// @param st struct
+  void ParsePolygons(char* ptr);
+  /// @brief function for find max and min coordinates of all axis
   /// @param counter_axis counter of current axis
   /// @param coord current coordinate
   void MinMaxCoord(int counter_axis, double coord);
   /// @brief function find coefficient for normalize value  coordinate points to
   /// -1 / 1
-  /// @param st struct
   /// @return coefficient
   double Normalize();
   /// @brief function for setting model on center of widget
-  /// @param st struct
   void SettingToCenter();
   /// @brief function for multiplication coordinates point on necessary
-  /// coefiiciant of scale
-  /// @param st struct
+  /// coefficient of scale
   /// @param scale scale
   void SetScale(double scale);
-  /// @brief functoin for rotation along the axis x on necessary angle
+  /// @brief function for rotation along the axis x on necessary angle
   /// @param angle
-  /// @param st
   void RotationX(double angle);
-  /// @brief functoin for rotation along the axis y on necessary angle
+  /// @brief function for rotation along the axis y on necessary angle
   /// @param angle
-  /// @param st
   void RotationY(double angle);
-  /// @brief functoin for rotation along the axis z on necessary angle
+  /// @brief function for rotation along the axis z on necessary angle
   /// @param angle
-  /// @param st
   void RotationZ(double angle);
-  /// @brief functoin for moving model on necessary coefficient along the axis
-  /// @param st
+  /// @brief function for moving model on necessary coefficient along the axis
   /// @param a coefficient
-  /// @param axis
-  void Move(double a, char axis);
-
+  /// @param i axis
+  void Move(double a, unsigned i);
+  /// @brief Getter for array vertex and poligons
+  /// @return pair of array
   std::pair<double*, unsigned*> GetArr();
+  /// @brief function for convert vectors to arrays
   void Converter();
+  /// @brief Getter for size of arrays
+  /// @return pair size
   std::pair<unsigned, unsigned> GetSize();
+
+  Model() = default;
 
   ~Model() {
     delete vertex_;
-    delete poligons_;
+    delete polygons_;
   }
 
  private:
-  std::vector<double> vertex;
-  std::vector<unsigned> poligons;
-  double* vertex_;
-  unsigned* poligons_;
-  double minmaxX[2] = {0};
-  double minmaxY[2] = {0};
-  double minmaxZ[2] = {0};
+  std::vector<double> vertex_vector_;
+  std::vector<unsigned> polygons_vector_;
+  double* vertex_ = nullptr;
+  unsigned* polygons_ = nullptr;
+  double minmaxX_[2] = {0};
+  double minmaxY_[2] = {0};
+  double minmaxZ_[2] = {0};
 };
 }  // namespace s21
 
-#endif  // SRC_S21_3DVIEWER_H_
+#endif  // CPP4_3D_VIEWER_V2_0_1_SRC_MODEL_MODEL_H_

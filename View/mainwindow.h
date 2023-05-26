@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef CPP4_3D_VIEWER_V2_0_1_SRC_VIEW_MAINWINDOW_H_
+#define CPP4_3D_VIEWER_V2_0_1_SRC_VIEW_MAINWINDOW_H_
 
 #include <QColorDialog>
 #include <QFileDialog>
@@ -8,8 +8,8 @@
 #include <QSettings>
 #include <QTimer>
 
+#include "../Controller/singleton.h"
 #include "../QtGifimage/gifimage/qgifimage.h"
-#include "../Controller/controller.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -87,24 +87,23 @@ class MainWindow : public QMainWindow {
 
   void saveGifFrame();
 
-  void load_setting();
+  void LoadSetting();
 
   void on_load_set_but_clicked();
 
  private:
+  int previous_value_slider_x_;
+  int previous_value_slider_y_;
+  int previous_value_slider_z_;
+  QTimer *timer_;
+  QGifImage *gif_;
+  QImage *frame_;
+  QString gif_save_path_;
+  int time_;
+  int previous_value_rotate_x_;
+  int previous_value_rotate_y_;
+  int previous_value_rotate_z_;
   Ui::MainWindow *ui;
-  int previous_value_slider_x;
-  int previous_value_slider_y;
-  int previous_value_slider_z;
-  QTimer *timer;
-  QGifImage *gif;
-  QImage *frame;
-  QString gifSavePath;
-  int time;
-  int previous_value_rotate_x;
-  int previous_value_rotate_y;
-  int previous_value_rotate_z;
-  s21::Controller* controller;
-  double previous_scale;
+  double previous_scale_;
 };
-#endif  // MAINWINDOW_H
+#endif  // CPP4_3D_VIEWER_V2_0_1_SRC_VIEW_MAINWINDOW_H_
