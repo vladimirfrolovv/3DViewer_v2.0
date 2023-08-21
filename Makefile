@@ -31,7 +31,7 @@ install:
 	@cd Qmake/ && qmake ../Viewer.pro && make
 
 open:
-	@$(OPEN) Qmake/Viewer.app/Contents/MacOS/./Viewer
+	@cd Qmake && ./Viewer
 
 uninstall:
 	@rm -rf Viewer.app
