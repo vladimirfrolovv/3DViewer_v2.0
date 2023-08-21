@@ -1,4 +1,4 @@
-# 3DViewerCpp
+# 3DViewer_v2.0
 Implementation project 3DViewer on c++
 
 В данном проекте реализовано приложение для просмотра 3D моделей в формате .obj файлов в каркасном виде на языке программирования С++.
@@ -20,7 +20,7 @@ Implementation project 3DViewer on c++
 
 ## Installation
 
-1. Для cборки проекта, находясь в директории 3DViewerV2.0, прописать:
+1. Для cборки проекта, находясь в директории 3DViewer_v2.0, прописать:
 ```sh
 make
 ```
