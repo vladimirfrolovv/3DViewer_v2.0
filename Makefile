@@ -7,11 +7,11 @@ UNAME = $(shell uname)
 OPEN :=
 
 ifeq ($(UNAME), Linux)
-	OPEN += xdg-open
+	OPEN += cd Qmake && ./Viewer
 endif
 
 ifeq ($(UNAME), Darwin)
-	OPEN += open
+	OPEN += open Qmake/Viewer.app/Contents/MacOS/./Viewer
 endif
 
 all: install
@@ -24,14 +24,14 @@ style:
 
 dvi:
 	doxygen
-	@$(OPEN) html/index.html
+	@cd html ./index.html
 
 install:
 	@mkdir Qmake
 	@cd Qmake/ && qmake ../Viewer.pro && make
 
 open:
-	@cd Qmake && ./Viewer
+	@$(OPEN)
 
 uninstall:
 	@rm -rf Viewer.app
