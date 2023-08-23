@@ -24,7 +24,7 @@ style:
 
 dvi:
 	doxygen
-	@cd html ./index.html
+	@open html/index.html
 
 install:
 	@mkdir Qmake
